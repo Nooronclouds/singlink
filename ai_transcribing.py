@@ -5,7 +5,7 @@ from typing import List
 
 class AITranscriber:
     def __init__(self):
-        self.api_key = os.getenv("HF_API_KEY", "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")
+        self.api_key = os.getenv("HF_API_KEY", "your api key here")
         # Using a better model for text generation
         self.api_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"
         
