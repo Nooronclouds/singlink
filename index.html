@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignLink - Real-time Sign Language Detection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+        }
+
+        /* Landing Page */
+        #landing-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #ffffff;
+        }
+
+        .landing-content {
+            text-align: center;
+        }
+
+        .landing-content h1 {
+            font-size: 3.5rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+            color: #1a1a1a;
+        }
+
+        .landing-content p {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 2.5rem;
+            font-weight: 400;
+        }
+
+        .start-btn {
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            padding: 0.875rem 2rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .start-btn:hover {
+            background: #333;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Detection Page */
+        #detection-page {
+            display: none;
+            min-height: 100vh;
+            background: #fafafa;
+        }
+
+        #detection-page.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #f0f0f0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .stop-btn {
+            background: transparent;
+            color: #666;
+            border: 1px solid #e0e0e0;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .stop-btn:hover {
+            background: #f5f5f5;
+            border-color: #ccc;
+            color: #1a1a1a;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 1.5rem;
+            padding: 5rem 1.5rem 1.5rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .video-section {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .video-container {
+            position: relative;
+            background: #f5f5f5;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        #video {
+            width: 100%;
+            display: block;
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .status-overlay {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar {
+            width: 360px;
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+            max-height: calc(100vh - 7rem);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h3 {
+            font-size: 1.125rem;
+            margin-bottom: 0.25rem;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .sidebar-subtitle {
+            color: #999;
+            font-size: 0.875rem;
+            margin-bottom: 1.25rem;
+            font-weight: 400;
+        }
+
+        .words-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+            min-height: 200px;
+        }
+
+        .word-item {
+            background: #fafafa;
+            padding: 0.875rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.625rem;
+            border-left: 2px solid #e0e0e0;
+            animation: slideIn 0.3s ease;
+            transition: all 0.2s ease;
+        }
+
+        .word-item:hover {
+            background: #f5f5f5;
+            border-left-color: #999;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .word-item .word {
+            font-weight: 500;
+            font-size: 1rem;
+            color: #1a1a1a;
+            margin-bottom: 0.25rem;
+        }
+
+        .word-item .time {
+            color: #999;
+            font-size: 0.8rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: #ccc;
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 0.75rem;
+            opacity: 0.4;
+            stroke: #ddd;
+        }
+
+        .empty-state p {
+            font-size: 0.875rem;
+            color: #aaa;
+        }
+
+        .word-count {
+            text-align: center;
+            padding: 0.5rem;
+            background: #fafafa;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .ai-section {
+            border-top: 1px solid #f0f0f0;
+            padding-top: 1.5rem;
+        }
+
+        .ai-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .ai-header svg {
+            width: 18px;
+            height: 18px;
+            color: #666;
+        }
+
+        .ai-header h4 {
+            font-size: 0.95rem;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .ai-transcription {
+            background: #1a1a1a;
+            color: white;
+            padding: 1.125rem;
+            border-radius: 8px;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            font-weight: 400;
+            font-size: 0.9375rem;
+        }
+
+        .ai-transcription.loading {
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .read-aloud-btn {
+            width: 100%;
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            padding: 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+
+        .read-aloud-btn:hover {
+            background: #f5f5f5;
+            border-color: #ccc;
+            color: #1a1a1a;
+        }
+
+        .read-aloud-btn.speaking {
+            background: #1a1a1a;
+            color: white;
+            border-color: #1a1a1a;
+        }
+
+        .complete-badge {
+            background: #1a1a1a;
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            margin-top: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Scrollbar styling */
+        .words-list::-webkit-scrollbar,
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .words-list::-webkit-scrollbar-track,
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .words-list::-webkit-scrollbar-thumb,
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #e0e0e0;
+            border-radius: 3px;
+        }
+
+        .words-list::-webkit-scrollbar-thumb:hover,
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: #ccc;
+        }
+
+        @media (max-width: 1024px) {
+            .landing-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .main-content {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Landing Page -->
+    <div id="landing-page">
+        <div class="landing-content">
+            <h1>SignLink</h1>
+            <p>Real-time sign language detection</p>
+            <button class="start-btn" onclick="startDetection()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                </svg>
+                Start Detection
+            </button>
+        </div>
+    </div>
+
+    <!-- Detection Page -->
+    <div id="detection-page">
+        <div class="header">
+            <h2>SignLink</h2>
+            <button class="stop-btn" onclick="stopDetection()">Stop</button>
+        </div>
+
+        <div class="main-content">
+            <div class="video-section">
+                <div class="video-container">
+                    <video id="video" autoplay playsinline></video>
+                    <canvas id="canvas"></canvas>
+                    <div class="status-overlay" id="status">Detecting hands...</div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <h3>Detected Words</h3>
+                <p class="sidebar-subtitle">Live transcription</p>
+
+                <div class="word-count" id="word-count">0 words detected</div>
+
+                <div class="words-list" id="words-list">
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6v6l4 2"/>
+                        </svg>
+                        <p>Waiting for signs...</p>
+                    </div>
+                </div>
+
+                <div class="ai-section">
+                    <div class="ai-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <h4>AI Interpretation</h4>
+                    </div>
+                    <div class="ai-transcription" id="ai-transcription">
+                        No words detected yet
+                    </div>
+                    <button class="read-aloud-btn" id="read-aloud-btn" onclick="readAloud()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                        </svg>
+                        Read Aloud
+                    </button>
+                    <div class="complete-badge" style="display: none;" id="complete-badge">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        Transcription complete
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let video, canvas, ctx;
+        let ws;
+        let isDetecting = false;
+        let detectedWords = [];
+
+        async function startDetection() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: 1280, 
+                        height: 720,
+                        facingMode: 'user'
+                    } 
+                });
+
+                document.getElementById('landing-page').style.display = 'none';
+                const detectionPage = document.getElementById('detection-page');
+                detectionPage.style.display = 'flex';
+                detectionPage.classList.add('active');
+
+                video = document.getElementById('video');
+                video.srcObject = stream;
+                
+                canvas = document.getElementById('canvas');
+                ctx = canvas.getContext('2d');
+
+                video.onloadedmetadata = () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    connectWebSocket();
+                };
+
+            } catch (error) {
+                alert('Camera access denied. Please allow camera access to use SignLink.');
+                console.error('Camera error:', error);
+            }
+        }
+
+        function connectWebSocket() {
+            ws = new WebSocket('ws://localhost:8000/ws');
+
+            ws.onopen = () => {
+                console.log('WebSocket connected');
+                isDetecting = true;
+                processFrames();
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleDetection(data);
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                document.getElementById('status').textContent = 'Connection error';
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket disconnected');
+                isDetecting = false;
+            };
+        }
+
+        function processFrames() {
+            if (!isDetecting) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = video.videoWidth;
+            tempCanvas.height = video.videoHeight;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(video, 0, 0);
+
+            const frameData = tempCanvas.toDataURL('image/jpeg', 0.8);
+
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'frame',
+                    data: frameData
+                }));
+            }
+
+            setTimeout(processFrames, 100);
+        }
+
+        function handleDetection(data) {
+            if (data.type === 'detection') {
+                if (data.bbox) {
+                    const scaleX = canvas.width / video.videoWidth;
+                    const scaleY = canvas.height / video.videoHeight;
+
+                    // Soft gray bounding box
+                    ctx.strokeStyle = 'rgba(102, 102, 102, 0.8)';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(
+                        data.bbox.x1 * scaleX,
+                        data.bbox.y1 * scaleY,
+                        (data.bbox.x2 - data.bbox.x1) * scaleX,
+                        (data.bbox.y2 - data.bbox.y1) * scaleY
+                    );
+
+                    // Subtle label background
+                    ctx.fillStyle = 'rgba(26, 26, 26, 0.75)';
+                    const textWidth = ctx.measureText(data.word).width;
+                    ctx.fillRect(
+                        data.bbox.x1 * scaleX - 5,
+                        (data.bbox.y1 - 35) * scaleY,
+                        textWidth + 20,
+                        30
+                    );
+
+                    // Label text
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = '500 20px Inter, -apple-system, sans-serif';
+                    ctx.fillText(
+                        data.word,
+                        data.bbox.x1 * scaleX + 5,
+                        (data.bbox.y1 - 12) * scaleY
+                    );
+                }
+
+                document.getElementById('status').textContent = `Detecting: ${data.word}`;
+
+                if (data.newWord) {
+                    addWordToList(data.newWord);
+                    
+                    const transcriptionEl = document.getElementById('ai-transcription');
+                    transcriptionEl.classList.add('loading');
+                    transcriptionEl.textContent = 'AI is thinking...';
+                    
+                    if (data.aiTranscription) {
+                        setTimeout(() => {
+                            transcriptionEl.classList.remove('loading');
+                            transcriptionEl.textContent = data.aiTranscription;
+                        }, 500);
+                    }
+                    
+                    updateWordCount(data.wordCount);
+                    document.getElementById('complete-badge').style.display = 'flex';
+                }
+            } else if (data.type === 'no_detection') {
+                document.getElementById('status').textContent = 'Detecting hands...';
+            }
+        }
+
+        function addWordToList(wordData) {
+            const wordsList = document.getElementById('words-list');
+            
+            if (wordsList.querySelector('.empty-state')) {
+                wordsList.innerHTML = '';
+            }
+
+            const wordItem = document.createElement('div');
+            wordItem.className = 'word-item';
+            wordItem.innerHTML = `
+                <div class="word">${wordData.word}</div>
+                <div class="time">${wordData.timestamp}</div>
+            `;
+
+            wordsList.insertBefore(wordItem, wordsList.firstChild);
+        }
+
+        function updateWordCount(count) {
+            document.getElementById('word-count').textContent = `${count} words detected`;
+        }
+
+        function readAloud() {
+            const text = document.getElementById('ai-transcription').textContent;
+            const btn = document.getElementById('read-aloud-btn');
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+
+                if (!btn.classList.contains('speaking')) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.rate = 0.9;
+                    utterance.pitch = 1;
+
+                    utterance.onstart = () => {
+                        btn.classList.add('speaking');
+                        btn.innerHTML = `
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="6" y="4" width="4" height="16"/>
+                                <rect x="14" y="4" width="4" height="16"/>
+                            </svg>
+                            Stop Reading
+                        `;
+                    };
+
+                    utterance.onend = () => {
+                        btn.classList.remove('speaking');
+                        btn.innerHTML = `
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                            </svg>
+                            Read Aloud
+                        `;
+                    };
+
+                    window.speechSynthesis.speak(utterance);
+                } else {
+                    window.speechSynthesis.cancel();
+                }
+            } else {
+                alert('Text-to-speech not supported in your browser.');
+            }
+        }
+
+        function stopDetection() {
+            isDetecting = false;
+            
+            if (ws) {
+                ws.close();
+            }
+
+            if (video && video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+
+            detectedWords = [];
+            document.getElementById('landing-page').style.display = 'flex';
+            const detectionPage = document.getElementById('detection-page');
+            detectionPage.style.display = 'none';
+            detectionPage.classList.remove('active');
+            
+            document.getElementById('words-list').innerHTML = `
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6l4 2"/>
+                    </svg>
+                    <p>Waiting for signs...</p>
+                </div>
+            `;
+            document.getElementById('ai-transcription').textContent = 'No words detected yet';
+            document.getElementById('word-count').textContent = '0 words detected';
+            document.getElementById('complete-badge').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
