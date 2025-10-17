@@ -1,3 +1,6 @@
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'  # Force CPU
+
 import pickle
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -5,7 +8,18 @@ from sklearn.preprocessing import LabelEncoder
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.utils import to_categorical
-from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.callbacks import EarlyStopping, Callback
+
+# ===== PROGRESS TRACKING CALLBACK =====
+class TrainingProgress(Callback):
+    def on_epoch_begin(self, epoch, logs=None):
+        print(f"🚀 Starting epoch {epoch+1}/100...")
+    
+    def on_epoch_end(self, epoch, logs=None):
+        accuracy = logs.get('accuracy', 0) * 100
+        val_accuracy = logs.get('val_accuracy', 0) * 100
+        print(f"✅ Epoch {epoch+1} completed - Acc: {accuracy:.1f}% | Val Acc: {val_accuracy:.1f}%")
+
 
 # Load sequences data
 sequences_dict = pickle.load(open('./sequences.pickle', 'rb'))
