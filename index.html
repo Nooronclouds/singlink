@@ -101,6 +101,42 @@
             color: #1a1a1a;
         }
 
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .mode-switch {
+            display: flex;
+            background: #f5f5f5;
+            border-radius: 6px;
+            padding: 0.25rem;
+            gap: 0.25rem;
+        }
+
+        .mode-btn {
+            background: transparent;
+            color: #666;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .mode-btn.active {
+            background: white;
+            color: #1a1a1a;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        .mode-btn:hover:not(.active) {
+            color: #1a1a1a;
+        }
+
         .stop-btn {
             background: transparent;
             color: #666;
@@ -168,6 +204,19 @@
             backdrop-filter: blur(10px);
         }
 
+        .mode-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(26, 26, 26, 0.8);
+            color: white;
+            padding: 0.375rem 0.875rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
         .sidebar {
             width: 360px;
             background: white;
@@ -194,6 +243,7 @@
             font-weight: 400;
         }
 
+        /* Dynamic Mode - Words List */
         .words-list {
             flex: 1;
             overflow-y: auto;
@@ -216,17 +266,6 @@
             border-left-color: #999;
         }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
         .word-item .word {
             font-weight: 500;
             font-size: 1rem;
@@ -237,6 +276,60 @@
         .word-item .time {
             color: #999;
             font-size: 0.8rem;
+        }
+
+        /* Static Mode - Text Display */
+        .text-display {
+            background: #fafafa;
+            padding: 1.25rem;
+            border-radius: 8px;
+            min-height: 120px;
+            margin-bottom: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 1.25rem;
+            line-height: 1.6;
+            color: #1a1a1a;
+            word-wrap: break-word;
+        }
+
+        .text-display.empty {
+            color: #ccc;
+            font-style: italic;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .char-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            max-height: 150px;
+        }
+
+        .char-item {
+            display: inline-block;
+            background: #f5f5f5;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            margin: 0.25rem;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .empty-state {
@@ -258,7 +351,7 @@
             color: #aaa;
         }
 
-        .word-count {
+        .detection-count {
             text-align: center;
             padding: 0.5rem;
             background: #fafafa;
@@ -312,8 +405,13 @@
             font-style: italic;
         }
 
-        .read-aloud-btn {
-            width: 100%;
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .read-aloud-btn, .clear-btn {
+            flex: 1;
             background: #fafafa;
             border: 1px solid #e0e0e0;
             padding: 0.75rem;
@@ -329,7 +427,7 @@
             font-size: 0.875rem;
         }
 
-        .read-aloud-btn:hover {
+        .read-aloud-btn:hover, .clear-btn:hover {
             background: #f5f5f5;
             border-color: #ccc;
             color: #1a1a1a;
@@ -339,6 +437,12 @@
             background: #1a1a1a;
             color: white;
             border-color: #1a1a1a;
+        }
+
+        .clear-btn:hover {
+            background: #fee;
+            border-color: #fcc;
+            color: #c33;
         }
 
         .complete-badge {
@@ -356,23 +460,27 @@
 
         /* Scrollbar styling */
         .words-list::-webkit-scrollbar,
-        .sidebar::-webkit-scrollbar {
+        .sidebar::-webkit-scrollbar,
+        .char-list::-webkit-scrollbar {
             width: 6px;
         }
 
         .words-list::-webkit-scrollbar-track,
-        .sidebar::-webkit-scrollbar-track {
+        .sidebar::-webkit-scrollbar-track,
+        .char-list::-webkit-scrollbar-track {
             background: transparent;
         }
 
         .words-list::-webkit-scrollbar-thumb,
-        .sidebar::-webkit-scrollbar-thumb {
+        .sidebar::-webkit-scrollbar-thumb,
+        .char-list::-webkit-scrollbar-thumb {
             background: #e0e0e0;
             border-radius: 3px;
         }
 
         .words-list::-webkit-scrollbar-thumb:hover,
-        .sidebar::-webkit-scrollbar-thumb:hover {
+        .sidebar::-webkit-scrollbar-thumb:hover,
+        .char-list::-webkit-scrollbar-thumb:hover {
             background: #ccc;
         }
 
@@ -388,6 +496,11 @@
             .sidebar {
                 width: 100%;
                 max-height: 500px;
+            }
+
+            .header-controls {
+                flex-direction: column;
+                gap: 0.5rem;
             }
         }
     </style>
@@ -412,7 +525,17 @@
     <div id="detection-page">
         <div class="header">
             <h2>SignLink</h2>
-            <button class="stop-btn" onclick="stopDetection()">Stop</button>
+            <div class="header-controls">
+                <div class="mode-switch">
+                    <button class="mode-btn active" id="static-mode-btn" onclick="switchMode('static')">
+                        Alphabet & Numbers
+                    </button>
+                    <button class="mode-btn" id="dynamic-mode-btn" onclick="switchMode('dynamic')">
+                        Words & Phrases
+                    </button>
+                </div>
+                <button class="stop-btn" onclick="stopDetection()">Stop</button>
+            </div>
         </div>
 
         <div class="main-content">
@@ -421,47 +544,91 @@
                     <video id="video" autoplay playsinline></video>
                     <canvas id="canvas"></canvas>
                     <div class="status-overlay" id="status">Detecting hands...</div>
+                    <div class="mode-indicator" id="mode-indicator">Static Mode</div>
                 </div>
             </div>
 
             <div class="sidebar">
-                <h3>Detected Words</h3>
-                <p class="sidebar-subtitle">Live transcription</p>
+                <!-- Dynamic Mode Content -->
+                <div id="dynamic-content" style="display: none; flex: 1; flex-direction: column;">
+                    <h3>Detected Words</h3>
+                    <p class="sidebar-subtitle">Live transcription</p>
 
-                <div class="word-count" id="word-count">0 words detected</div>
+                    <div class="detection-count" id="word-count">0 words detected</div>
 
-                <div class="words-list" id="words-list">
-                    <div class="empty-state">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="M12 6v6l4 2"/>
-                        </svg>
-                        <p>Waiting for signs...</p>
+                    <div class="words-list" id="words-list">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                            <p>Waiting for signs...</p>
+                        </div>
+                    </div>
+
+                    <div class="ai-section">
+                        <div class="ai-header">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            <h4>AI Interpretation</h4>
+                        </div>
+                        <div class="ai-transcription" id="ai-transcription">
+                            No words detected yet
+                        </div>
+                        <div class="action-buttons">
+                            <button class="read-aloud-btn" id="read-aloud-btn" onclick="readAloud()">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                                </svg>
+                                Read Aloud
+                            </button>
+                            <button class="clear-btn" onclick="clearDetections()">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                                Clear
+                            </button>
+                        </div>
+                        <div class="complete-badge" style="display: none;" id="complete-badge">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            Transcription complete
+                        </div>
                     </div>
                 </div>
 
-                <div class="ai-section">
-                    <div class="ai-header">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                        </svg>
-                        <h4>AI Interpretation</h4>
+                <!-- Static Mode Content -->
+                <div id="static-content" style="flex: 1; display: flex; flex-direction: column;">
+                    <h3>Detected Text</h3>
+                    <p class="sidebar-subtitle">Character recognition</p>
+
+                    <div class="text-display" id="text-display">
+                        <span class="empty">Start signing to see text...</span>
                     </div>
-                    <div class="ai-transcription" id="ai-transcription">
-                        No words detected yet
-                    </div>
-                    <button class="read-aloud-btn" id="read-aloud-btn" onclick="readAloud()">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                        </svg>
-                        Read Aloud
-                    </button>
-                    <div class="complete-badge" style="display: none;" id="complete-badge">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <polyline points="20 6 9 17 4 12"/>
-                        </svg>
-                        Transcription complete
+
+                    <div class="detection-count" id="char-count">0 characters detected</div>
+
+                    <div class="char-list" id="char-list"></div>
+
+                    <div class="action-buttons">
+                        <button class="read-aloud-btn" id="read-text-btn" onclick="readText()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                            </svg>
+                            Read Text
+                        </button>
+                        <button class="clear-btn" onclick="clearDetections()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                            Clear
+                        </button>
                     </div>
                 </div>
             </div>
@@ -472,7 +639,9 @@
         let video, canvas, ctx;
         let ws;
         let isDetecting = false;
+        let currentMode = 'static';
         let detectedWords = [];
+        let detectedChars = [];
 
         async function startDetection() {
             try {
@@ -557,6 +726,44 @@
 
         function handleDetection(data) {
             if (data.type === 'detection') {
+                // Draw hand landmarks (the cool skeleton effect!)
+                if (data.landmarks && data.landmarks.length > 0) {
+                    const scaleX = canvas.width / video.videoWidth;
+                    const scaleY = canvas.height / video.videoHeight;
+
+                    data.landmarks.forEach(hand => {
+                        // Draw connections (bones)
+                        const connections = [
+                            [0,1],[1,2],[2,3],[3,4],  // Thumb
+                            [0,5],[5,6],[6,7],[7,8],  // Index
+                            [0,9],[9,10],[10,11],[11,12],  // Middle
+                            [0,13],[13,14],[14,15],[15,16],  // Ring
+                            [0,17],[17,18],[18,19],[19,20],  // Pinky
+                            [5,9],[9,13],[13,17]  // Palm
+                        ];
+
+                        // Draw lines
+                        ctx.strokeStyle = 'rgba(102, 102, 102, 0.6)';
+                        ctx.lineWidth = 2;
+                        connections.forEach(([start, end]) => {
+                            const startPoint = hand[start];
+                            const endPoint = hand[end];
+                            ctx.beginPath();
+                            ctx.moveTo(startPoint.x * canvas.width, startPoint.y * canvas.height);
+                            ctx.lineTo(endPoint.x * canvas.width, endPoint.y * canvas.height);
+                            ctx.stroke();
+                        });
+
+                        // Draw landmark points
+                        hand.forEach((point, idx) => {
+                            ctx.fillStyle = idx === 0 ? 'rgba(255, 100, 100, 0.8)' : 'rgba(100, 200, 255, 0.8)';
+                            ctx.beginPath();
+                            ctx.arc(point.x * canvas.width, point.y * canvas.height, idx === 0 ? 6 : 4, 0, 2 * Math.PI);
+                            ctx.fill();
+                        });
+                    });
+                }
+
                 if (data.bbox) {
                     const scaleX = canvas.width / video.videoWidth;
                     const scaleY = canvas.height / video.videoHeight;
@@ -571,9 +778,11 @@
                         (data.bbox.y2 - data.bbox.y1) * scaleY
                     );
 
-                    // Subtle label background
+                    // Label background
                     ctx.fillStyle = 'rgba(26, 26, 26, 0.75)';
-                    const textWidth = ctx.measureText(data.word).width;
+                    const text = data.content || "Detecting...";
+                    ctx.font = '500 20px Inter, -apple-system, sans-serif';
+                    const textWidth = ctx.measureText(text).width;
                     ctx.fillRect(
                         data.bbox.x1 * scaleX - 5,
                         (data.bbox.y1 - 35) * scaleY,
@@ -583,39 +792,54 @@
 
                     // Label text
                     ctx.fillStyle = '#ffffff';
-                    ctx.font = '500 20px Inter, -apple-system, sans-serif';
                     ctx.fillText(
-                        data.word,
+                        text,
                         data.bbox.x1 * scaleX + 5,
                         (data.bbox.y1 - 12) * scaleY
                     );
                 }
 
-                document.getElementById('status').textContent = `Detecting: ${data.word}`;
+                const statusText = data.mode === 'dynamic' 
+                    ? `Detecting word: ${data.content} (${data.progress}/30)`
+                    : `Detecting: ${data.content}`;
+                document.getElementById('status').textContent = statusText;
 
-                if (data.newWord) {
-                    addWordToList(data.newWord);
+                if (data.newDetection) {
+                    console.log('New detection:', data.newDetection); // Debug log
                     
-                    const transcriptionEl = document.getElementById('ai-transcription');
-                    transcriptionEl.classList.add('loading');
-                    transcriptionEl.textContent = 'AI is thinking...';
-                    
-                    if (data.aiTranscription) {
-                        setTimeout(() => {
-                            transcriptionEl.classList.remove('loading');
-                            transcriptionEl.textContent = data.aiTranscription;
-                        }, 500);
+                    if (data.mode === 'dynamic') {
+                        // Dynamic mode - add word
+                        addWordToList(data.newDetection);
+                        
+                        const transcriptionEl = document.getElementById('ai-transcription');
+                        transcriptionEl.classList.add('loading');
+                        transcriptionEl.textContent = 'AI is thinking...';
+                        
+                        if (data.aiTranscription) {
+                            setTimeout(() => {
+                                transcriptionEl.classList.remove('loading');
+                                transcriptionEl.textContent = data.aiTranscription;
+                            }, 300);
+                        }
+                        
+                        updateWordCount(data.detectionCount);
+                        document.getElementById('complete-badge').style.display = 'flex';
+                    } else {
+                        // Static mode - add character
+                        addCharacter(data.newDetection);
+                        updateText(data.currentText);
+                        updateCharCount(data.detectionCount);
                     }
-                    
-                    updateWordCount(data.wordCount);
-                    document.getElementById('complete-badge').style.display = 'flex';
                 }
             } else if (data.type === 'no_detection') {
                 document.getElementById('status').textContent = 'Detecting hands...';
+            } else if (data.type === 'mode_switched') {
+                console.log('Mode switched to:', data.newMode);
             }
         }
 
         function addWordToList(wordData) {
+            console.log('Adding word to list:', wordData); // Debug log
             const wordsList = document.getElementById('words-list');
             
             if (wordsList.querySelector('.empty-state')) {
@@ -630,10 +854,88 @@
             `;
 
             wordsList.insertBefore(wordItem, wordsList.firstChild);
+            console.log('Word added to DOM'); // Debug log
+        }
+
+        function addCharacter(charData) {
+            const charList = document.getElementById('char-list');
+            
+            const charItem = document.createElement('span');
+            charItem.className = 'char-item';
+            charItem.textContent = charData.char;
+            charItem.style.animation = 'slideIn 0.3s ease';
+
+            charList.appendChild(charItem);
+        }
+
+        function updateText(text) {
+            const textDisplay = document.getElementById('text-display');
+            if (text && text.length > 0) {
+                textDisplay.innerHTML = text;
+                textDisplay.classList.remove('empty');
+            } else {
+                textDisplay.innerHTML = '<span class="empty">Start signing to see text...</span>';
+                textDisplay.classList.add('empty');
+            }
         }
 
         function updateWordCount(count) {
             document.getElementById('word-count').textContent = `${count} words detected`;
+        }
+
+        function updateCharCount(count) {
+            document.getElementById('char-count').textContent = `${count} characters detected`;
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            // Update UI
+            document.getElementById('static-mode-btn').classList.toggle('active', mode === 'static');
+            document.getElementById('dynamic-mode-btn').classList.toggle('active', mode === 'dynamic');
+            
+            document.getElementById('static-content').style.display = mode === 'static' ? 'flex' : 'none';
+            document.getElementById('dynamic-content').style.display = mode === 'dynamic' ? 'flex' : 'none';
+            
+            const modeIndicator = document.getElementById('mode-indicator');
+            modeIndicator.textContent = mode === 'static' ? 'Static Mode' : 'Dynamic Mode';
+            
+            // Send mode switch to backend
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'switch_mode',
+                    mode: mode
+                }));
+            }
+        }
+
+        function clearDetections() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'reset'
+                }));
+            }
+            
+            // Clear UI
+            if (currentMode === 'dynamic') {
+                document.getElementById('words-list').innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6v6l4 2"/>
+                        </svg>
+                        <p>Waiting for signs...</p>
+                    </div>
+                `;
+                document.getElementById('ai-transcription').textContent = 'No words detected yet';
+                document.getElementById('word-count').textContent = '0 words detected';
+                document.getElementById('complete-badge').style.display = 'none';
+            } else {
+                document.getElementById('text-display').innerHTML = '<span class="empty">Start signing to see text...</span>';
+                document.getElementById('text-display').classList.add('empty');
+                document.getElementById('char-list').innerHTML = '';
+                document.getElementById('char-count').textContent = '0 characters detected';
+            }
         }
 
         function readAloud() {
@@ -679,6 +981,50 @@
             }
         }
 
+        function readText() {
+            const textDisplay = document.getElementById('text-display');
+            const text = textDisplay.textContent;
+            const btn = document.getElementById('read-text-btn');
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+
+                if (!btn.classList.contains('speaking')) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.rate = 0.9;
+                    utterance.pitch = 1;
+
+                    utterance.onstart = () => {
+                        btn.classList.add('speaking');
+                        btn.innerHTML = `
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="6" y="4" width="4" height="16"/>
+                                <rect x="14" y="4" width="4" height="16"/>
+                            </svg>
+                            Stop Reading
+                        `;
+                    };
+
+                    utterance.onend = () => {
+                        btn.classList.remove('speaking');
+                        btn.innerHTML = `
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                            </svg>
+                            Read Text
+                        `;
+                    };
+
+                    window.speechSynthesis.speak(utterance);
+                } else {
+                    window.speechSynthesis.cancel();
+                }
+            } else {
+                alert('Text-to-speech not supported in your browser.');
+            }
+        }
+
         function stopDetection() {
             isDetecting = false;
             
@@ -691,11 +1037,13 @@
             }
 
             detectedWords = [];
+            detectedChars = [];
             document.getElementById('landing-page').style.display = 'flex';
             const detectionPage = document.getElementById('detection-page');
             detectionPage.style.display = 'none';
             detectionPage.classList.remove('active');
             
+            // Reset both modes
             document.getElementById('words-list').innerHTML = `
                 <div class="empty-state">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -708,6 +1056,15 @@
             document.getElementById('ai-transcription').textContent = 'No words detected yet';
             document.getElementById('word-count').textContent = '0 words detected';
             document.getElementById('complete-badge').style.display = 'none';
+            
+            document.getElementById('text-display').innerHTML = '<span class="empty">Start signing to see text...</span>';
+            document.getElementById('text-display').classList.add('empty');
+            document.getElementById('char-list').innerHTML = '';
+            document.getElementById('char-count').textContent = '0 characters detected';
+            
+            // Reset to static mode
+            currentMode = 'static';
+            switchMode('static');
         }
     </script>
 </body>
