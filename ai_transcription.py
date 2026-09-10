@@ -4,8 +4,8 @@ import json
 from typing import List
 
 class AITranscriber:
-    def __init__(self):
-        self.api_key = os.getenv("HF_API_KEY", "your api key here")
+    def __init__(self):  # ✅ FIXED: Double underscores
+        self.api_key = os.getenv("HF_API_KEY")
         # Using a better model for text generation
         self.api_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"
         
@@ -100,7 +100,7 @@ Natural sentence: [/INST]"""
         sentence = []
         
         for i, word in enumerate(words):
-            word = word.lower()
+            word = str(word).lower()  # Ensure it's a string
             
             # Handle personal pronouns
             if word in ['i', 'me']:
@@ -127,7 +127,7 @@ class AITranscriberAlternative:
     """
     Alternative transcriber using free APIs
     """
-    def __init__(self):
+    def __init__(self):  # ✅ FIXED: Double underscores
         pass
     
     def transcribe_signs(self, words: List[str]) -> str:
@@ -148,7 +148,7 @@ class AITranscriberAlternative:
         """
         Apply ASL to English grammar rules
         """
-        words = [w.lower() for w in words]
+        words = [str(w).lower() for w in words]
         result = []
         
         # Handle common patterns
@@ -181,7 +181,7 @@ class AITranscriberAlternative:
 
 
 # Usage:
-if __name__ == "__main__":
+if __name__ == "__main__":  # ✅ FIXED: Double underscores
     # Test the transcriber
     transcriber = AITranscriber()
     

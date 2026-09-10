@@ -1,6 +1,3 @@
-import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '-1'  # Force CPU
-
 import pickle
 import cv2
 import mediapipe as mp
